@@ -64,7 +64,7 @@ func (uc *LoginUseCase) Execute(req LoginRequest) (*LoginResponse, error) {
 func generateJWT(user *entities.User) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		secret = "jwt_secret_key_default"
+		return "", errors.New("JWT_SECRET no está configurado en las variables de entorno")
 	}
 
 	claims := Claims{

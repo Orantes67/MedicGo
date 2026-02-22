@@ -18,6 +18,14 @@ func main() {
 		log.Println(" No .env file found, using system environment variables")
 	}
 
+	// Validar variables de entorno obligatorias
+	if os.Getenv("JWT_SECRET") == "" {
+		log.Fatal("❌ JWT_SECRET no está configurado. Define la variable de entorno antes de iniciar.")
+	}
+	if os.Getenv("MONGO_CREDENTIALS") == "" {
+		log.Fatal("❌ MONGO_CREDENTIALS no está configurado. Define la variable de entorno antes de iniciar.")
+	}
+
 	// Conectar a MongoDB
 	core.ConnectMongoDB()
 
