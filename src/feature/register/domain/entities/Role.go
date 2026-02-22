@@ -1,7 +1,7 @@
 package entities
 
 const (
-	RoleNurse  = "nurse"
+	RoleNurse  = "enfermero"
 	RoleDoctor = "doctor"
 	RoleAdmin  = "admin"
 )
