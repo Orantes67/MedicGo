@@ -21,10 +21,12 @@ func NewRegisterUseCase(repo repositories.UserRepository) *RegisterUseCase {
 
 // RegisterRequest es el DTO de entrada.
 type RegisterRequest struct {
-	Name     string `json:"name" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
-	Role     string `json:"role" binding:"required,oneof=enfermero doctor admin"`
+	Name          string `json:"name"           binding:"required"`
+	LicenseNumber string `json:"license_number" binding:"required"`
+	Specialty     string `json:"specialty"      binding:"required,oneof=urgencias hospitalizacion uci"`
+	Email         string `json:"email"          binding:"required,email"`
+	Password      string `json:"password"       binding:"required,min=8"`
+	Role          string `json:"role"           binding:"required,oneof=enfermero doctor jefe_doctor jefe_enfermera"`
 }
 
 // RegisterResponse es el DTO de salida.
@@ -33,11 +35,11 @@ type RegisterResponse struct {
 	User    *entities.User `json:"user"`
 }
 
-// Execute registra un nuevo usuario si el email no existe.
+// Execute registra un nuevo usuario si el número de colegiado no existe.
 func (uc *RegisterUseCase) Execute(req RegisterRequest) (*RegisterResponse, error) {
-	existing, _ := uc.repo.FindByEmail(req.Email)
+	existing, _ := uc.repo.FindByLicenseNumber(req.LicenseNumber)
 	if existing != nil {
-		return nil, errors.New("el email ya está registrado")
+		return nil, errors.New("el número de colegiado ya está registrado")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -46,11 +48,13 @@ func (uc *RegisterUseCase) Execute(req RegisterRequest) (*RegisterResponse, erro
 	}
 
 	user := &entities.User{
-		ID:       primitive.NewObjectID(),
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: string(hashedPassword),
-		Role:     req.Role,
+		ID:            primitive.NewObjectID(),
+		Name:          req.Name,
+		LicenseNumber: req.LicenseNumber,
+		Email:         req.Email,
+		Password:      string(hashedPassword),
+		Role:          req.Role,
+		Specialty:     req.Specialty,
 	}
 
 	if err := uc.repo.Save(user); err != nil {

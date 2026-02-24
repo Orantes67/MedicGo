@@ -6,6 +6,7 @@ import (
 
 	"ApiMedicGO/src/core"
 	loginRouters "ApiMedicGO/src/feature/login/infraestructure/routers"
+	pacientesRouters "ApiMedicGO/src/feature/pacientes/infraestructure/routers"
 	registerRouters "ApiMedicGO/src/feature/register/infraestructure/routers"
 
 	"github.com/gin-gonic/gin"
@@ -37,6 +38,7 @@ func main() {
 	{
 		loginRouters.SetupLoginRoutes(api, core.DB)
 		registerRouters.SetupRegisterRoutes(api, core.DB)
+		pacientesRouters.SetupPacientesRoutes(api, core.DB)
 	}
 
 	// Iniciar servidor

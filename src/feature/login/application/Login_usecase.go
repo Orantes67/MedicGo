@@ -23,8 +23,8 @@ func NewLoginUseCase(repo repositories.UserRepository) *LoginUseCase {
 
 // LoginRequest es el DTO de entrada.
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
+	LicenseNumber string `json:"license_number" binding:"required"`
+	Password      string `json:"password" binding:"required"`
 }
 
 // LoginResponse es el DTO de salida.
@@ -35,15 +35,15 @@ type LoginResponse struct {
 
 // Claims define el payload del JWT.
 type Claims struct {
-	UserID string `json:"user_id"`
-	Email  string `json:"email"`
-	Role   string `json:"role"`
+	UserID        string `json:"user_id"`
+	LicenseNumber string `json:"license_number"`
+	Role          string `json:"role"`
 	jwt.RegisteredClaims
 }
 
 // Execute valida las credenciales y retorna un JWT si son correctas.
 func (uc *LoginUseCase) Execute(req LoginRequest) (*LoginResponse, error) {
-	user, err := uc.repo.FindByEmail(req.Email)
+	user, err := uc.repo.FindByLicenseNumber(req.LicenseNumber)
 	if err != nil {
 		return nil, errors.New("credenciales inválidas")
 	}
@@ -68,9 +68,9 @@ func generateJWT(user *entities.User) (string, error) {
 	}
 
 	claims := Claims{
-		UserID: user.ID.Hex(),
-		Email:  user.Email,
-		Role:   user.Role,
+		UserID:        user.ID.Hex(),
+		LicenseNumber: user.LicenseNumber,
+		Role:          user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
