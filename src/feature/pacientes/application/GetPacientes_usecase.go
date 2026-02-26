@@ -17,12 +17,12 @@ func NewGetPacientesUseCase(repo repositories.PacienteRepository) *GetPacientesU
 }
 
 // Execute retorna pacientes según el rol del usuario:
-//   - jefe_doctor / jefe_enfermera → todos los pacientes
-//   - doctor   → solo pacientes asignados a él
-//   - enfermero → solo pacientes asignados a él
+//   - administrador → todos los pacientes
+//   - doctor        → solo pacientes asignados a él
+//   - enfermero     → solo pacientes asignados a él
 func (uc *GetPacientesUseCase) Execute(role, userID string) ([]*entities.Paciente, error) {
 	switch role {
-	case loginEntities.RoleJefeDoctor, loginEntities.RoleJefeEnfermera:
+	case loginEntities.RoleAdmin:
 		return uc.repo.FindAll()
 	case loginEntities.RoleDoctor:
 		return uc.repo.FindByDoctor(userID)

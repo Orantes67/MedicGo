@@ -18,7 +18,7 @@ func NewAssignPacienteController(uc *application.AssignPacienteUseCase) *AssignP
 
 // Assign godoc
 // @Summary      Asignar paciente
-// @Description  jefe_doctor asigna a un doctor | jefe_enfermera asigna a una enfermera
+// @Description  administrador asigna a un doctor y/o enfermera
 // @Tags         pacientes
 // @Accept       json
 // @Produce      json

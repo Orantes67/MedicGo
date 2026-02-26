@@ -26,7 +26,7 @@ type RegisterRequest struct {
 	Specialty     string `json:"specialty"      binding:"required,oneof=urgencias hospitalizacion uci"`
 	Email         string `json:"email"          binding:"required,email"`
 	Password      string `json:"password"       binding:"required,min=8"`
-	Role          string `json:"role"           binding:"required,oneof=enfermero doctor jefe_doctor jefe_enfermera"`
+	Role          string `json:"role"           binding:"required,oneof=enfermero doctor administrador"`
 }
 
 // RegisterResponse es el DTO de salida.
