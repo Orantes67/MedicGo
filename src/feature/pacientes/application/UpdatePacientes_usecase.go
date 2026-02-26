@@ -14,15 +14,17 @@ func NewUpdatePacienteUseCase(repo repositories.PacienteRepository) *UpdatePacie
 }
 
 // UpdatePacienteRequest DTO de entrada para actualizar un paciente.
+// Solo se actualizan los campos que vengan con valor no-zero.
 type UpdatePacienteRequest struct {
-	Nombre          string  `json:"nombre"`
-	Edad            int     `json:"edad"`
-	Estatura        float64 `json:"estatura"`
-	Peso            float64 `json:"peso"`
-	RitmoCardiaco   int     `json:"ritmo_cardiaco"`
-	Saturacion      float64 `json:"saturacion"`
-	PresionArterial string  `json:"presion_arterial"`
-	SpO2            float64 `json:"spo2"`
+	Nombre              string `json:"nombre"`
+	Apellido            string `json:"apellido"`
+	Edad                int    `json:"edad"`
+	AreaNombre          string `json:"area_nombre"`
+	EstadoActual        string `json:"estado_actual"`
+	NotaCondicion       string `json:"nota_condicion"`
+	TipoSangre          string `json:"tipo_sangre"`
+	Sintomas            string `json:"sintomas"`
+	UltimaActualizacion string `json:"ultima_actualizacion"`
 }
 
 func (uc *UpdatePacienteUseCase) Execute(id string, req UpdatePacienteRequest) (*entities.Paciente, error) {
@@ -35,26 +37,29 @@ func (uc *UpdatePacienteUseCase) Execute(id string, req UpdatePacienteRequest) (
 	if req.Nombre != "" {
 		existing.Nombre = req.Nombre
 	}
+	if req.Apellido != "" {
+		existing.Apellido = req.Apellido
+	}
 	if req.Edad > 0 {
 		existing.Edad = req.Edad
 	}
-	if req.Estatura > 0 {
-		existing.Estatura = req.Estatura
+	if req.AreaNombre != "" {
+		existing.AreaNombre = req.AreaNombre
 	}
-	if req.Peso > 0 {
-		existing.Peso = req.Peso
+	if req.EstadoActual != "" {
+		existing.EstadoActual = req.EstadoActual
 	}
-	if req.RitmoCardiaco > 0 {
-		existing.RitmoCardiaco = req.RitmoCardiaco
+	if req.NotaCondicion != "" {
+		existing.NotaCondicion = req.NotaCondicion
 	}
-	if req.Saturacion > 0 {
-		existing.Saturacion = req.Saturacion
+	if req.TipoSangre != "" {
+		existing.TipoSangre = req.TipoSangre
 	}
-	if req.PresionArterial != "" {
-		existing.PresionArterial = req.PresionArterial
+	if req.Sintomas != "" {
+		existing.Sintomas = req.Sintomas
 	}
-	if req.SpO2 > 0 {
-		existing.SpO2 = req.SpO2
+	if req.UltimaActualizacion != "" {
+		existing.UltimaActualizacion = req.UltimaActualizacion
 	}
 
 	if err := uc.repo.Update(id, existing); err != nil {

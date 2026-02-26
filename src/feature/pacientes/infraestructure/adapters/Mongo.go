@@ -74,14 +74,15 @@ func (r *MongoPacienteRepository) Update(id string, paciente *entities.Paciente)
 
 	update := bson.M{
 		"$set": bson.M{
-			"nombre":           paciente.Nombre,
-			"edad":             paciente.Edad,
-			"estatura":         paciente.Estatura,
-			"peso":             paciente.Peso,
-			"ritmo_cardiaco":   paciente.RitmoCardiaco,
-			"saturacion":       paciente.Saturacion,
-			"presion_arterial": paciente.PresionArterial,
-			"spo2":             paciente.SpO2,
+			"nombre":               paciente.Nombre,
+			"apellido":             paciente.Apellido,
+			"edad":                 paciente.Edad,
+			"area_nombre":          paciente.AreaNombre,
+			"estado_actual":        paciente.EstadoActual,
+			"nota_condicion":       paciente.NotaCondicion,
+			"tipo_sangre":          paciente.TipoSangre,
+			"sintomas":             paciente.Sintomas,
+			"ultima_actualizacion": paciente.UltimaActualizacion,
 		},
 	}
 
@@ -148,7 +149,7 @@ func (r *MongoPacienteRepository) FindByEnfermero(enfermeroID string) ([]*entiti
 
 // Assign actualiza el doctor_id y/o el enfermero_id de un paciente.
 // Si el puntero es nil, el campo no se toca. Si apunta a "", se limpia.
-func (r *MongoPacienteRepository) Assign(pacienteID string, doctorID *string, enfermeroID *string) error {
+func (r *MongoPacienteRepository) Assign(pacienteID string, doctorID *string, enfermeroID *string, nombreEnfermero string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -174,12 +175,16 @@ func (r *MongoPacienteRepository) Assign(pacienteID string, doctorID *string, en
 	if enfermeroID != nil {
 		if *enfermeroID == "" {
 			setFields["enfermero_id"] = nil
+			setFields["nombre_enfermero"] = ""
 		} else {
 			enfObjID, err := primitive.ObjectIDFromHex(*enfermeroID)
 			if err != nil {
 				return errors.New("enfermero_id inválido")
 			}
 			setFields["enfermero_id"] = enfObjID
+			if nombreEnfermero != "" {
+				setFields["nombre_enfermero"] = nombreEnfermero
+			}
 		}
 	}
 
