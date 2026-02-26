@@ -18,7 +18,7 @@ func NewCreatePacienteController(uc *application.CreatePacienteUseCase) *CreateP
 
 // Create godoc
 // @Summary      Crear paciente
-// @Description  Cualquier usuario autenticado puede registrar un paciente
+// @Description  Solo el administrador puede registrar un nuevo paciente
 // @Tags         pacientes
 // @Accept       json
 // @Produce      json

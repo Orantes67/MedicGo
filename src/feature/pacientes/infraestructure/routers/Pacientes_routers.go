@@ -12,12 +12,12 @@ import (
 // SetupPacientesRoutes registra las rutas del feature pacientes.
 //
 // Reglas de acceso:
-//   - POST   /pacientes              → todos los usuarios autenticados (crear un nuevo paciente)
-//   - GET    /pacientes              → todos (jefes ven todo; doctor/enfermero solo los suyos)
+//   - POST   /pacientes              → solo administrador (crear un nuevo paciente)
+//   - GET    /pacientes              → todos (administrador ve todo; doctor/enfermero solo los suyos)
 //   - GET    /pacientes/:id          → todos los autenticados
-//   - PATCH  /pacientes/:id/asignar  → jefe_doctor (asigna doctor) | jefe_enfermera (asigna enfermero)
+//   - PATCH  /pacientes/:id/asignar  → administrador (asigna doctor y/o enfermero)
 //   - PUT    /pacientes/:id          → todos los autenticados (actualizar signos vitales)
-//   - DELETE /pacientes/:id          → solo jefes
+//   - DELETE /pacientes/:id          → solo administrador
 func SetupPacientesRoutes(router *gin.RouterGroup, db *mongo.Database) {
 	ctrl := dependencies_paciente.SetupPacienteDependencies(db)
 
@@ -25,20 +25,19 @@ func SetupPacientesRoutes(router *gin.RouterGroup, db *mongo.Database) {
 	pacientes.Use(middleware.AuthMiddleware())
 	{
 		// Todos los autenticados
-		pacientes.POST("", ctrl.Create.Create)
 		pacientes.GET("", ctrl.GetAll.GetAll)
 		pacientes.GET("/:id", ctrl.GetByID.GetByID)
 		pacientes.PUT("/:id", ctrl.Update.Update)
 
-		// Solo jefes pueden asignar o eliminar
-		jefeOnly := pacientes.Group("")
-		jefeOnly.Use(middleware.RequireRole(
-			loginEntities.RoleJefeDoctor,
-			loginEntities.RoleJefeEnfermera,
+		// Solo administrador puede crear, asignar o eliminar
+		adminOnly := pacientes.Group("")
+		adminOnly.Use(middleware.RequireRole(
+			loginEntities.RoleAdmin,
 		))
 		{
-			jefeOnly.PATCH("/:id/asignar", ctrl.Assign.Assign)
-			jefeOnly.DELETE("/:id", ctrl.Delete.Delete)
+			adminOnly.POST("", ctrl.Create.Create)
+			adminOnly.PATCH("/:id/asignar", ctrl.Assign.Assign)
+			adminOnly.DELETE("/:id", ctrl.Delete.Delete)
 		}
 	}
 }

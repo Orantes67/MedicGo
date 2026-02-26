@@ -2,10 +2,9 @@ package entities
 
 const (
 	// Roles del sistema
-	RoleNurse         = "enfermero"
-	RoleDoctor        = "doctor"
-	RoleJefeDoctor    = "jefe_doctor"
-	RoleJefeEnfermera = "jefe_enfermera"
+	RoleNurse   = "enfermero"
+	RoleDoctor  = "doctor"
+	RoleAdmin   = "administrador"
 
 	// Áreas / Especialidades del hospital
 	SpecialtyUrgencias       = "urgencias"       // Atención inmediata y triaje
