@@ -23,7 +23,7 @@ func NewRegisterUseCase(repo repositories.UserRepository) *RegisterUseCase {
 type RegisterRequest struct {
 	Name          string `json:"name"           binding:"required"`
 	LicenseNumber string `json:"license_number" binding:"required"`
-	Specialty     string `json:"specialty"      binding:"required,oneof=urgencias hospitalizacion uci"`
+	Specialty     string `json:"specialty"      binding:"required,oneof=urgencias hospitalizacion uci cirugia pediatria"`
 	Email         string `json:"email"          binding:"required,email"`
 	Password      string `json:"password"       binding:"required,min=8"`
 	Role          string `json:"role"           binding:"required,oneof=enfermero doctor administrador"`
