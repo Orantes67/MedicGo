@@ -32,3 +32,12 @@ func (r *MongoUserRepository) FindByLicenseNumber(licenseNumber string) (*entiti
 	}
 	return &user, nil
 }
+
+// CreateUser crea un nuevo usuario en la base de datos.
+func (r *MongoUserRepository) CreateUser(user *entities.User) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := r.collection.InsertOne(ctx, user)
+	return err
+}
