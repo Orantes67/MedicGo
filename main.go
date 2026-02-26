@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"ApiMedicGO/src/core"
+	doctorRouters "ApiMedicGO/src/feature/doctores/infraestructure/routers"
+	enfermeroRouters "ApiMedicGO/src/feature/enfermeros/infraestructure/routers"
 	loginRouters "ApiMedicGO/src/feature/login/infraestructure/routers"
 	pacientesRouters "ApiMedicGO/src/feature/pacientes/infraestructure/routers"
 	registerRouters "ApiMedicGO/src/feature/register/infraestructure/routers"
@@ -39,6 +41,9 @@ func main() {
 		loginRouters.SetupLoginRoutes(api, core.DB)
 		registerRouters.SetupRegisterRoutes(api, core.DB)
 		pacientesRouters.SetupPacientesRoutes(api, core.DB)
+		// publisher = nil → NoopPublisher until you inject the WebSocket hub.
+		enfermeroRouters.SetupEnfermerosRoutes(api, core.DB, nil)
+		doctorRouters.SetupDoctoresRoutes(api, core.DB, nil)
 	}
 
 	// Iniciar servidor

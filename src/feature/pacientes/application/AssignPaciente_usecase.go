@@ -17,11 +17,13 @@ func NewAssignPacienteUseCase(repo repositories.PacienteRepository) *AssignPacie
 
 // AssignPacienteRequest DTO para asignar un paciente.
 // Solo el rol administrador puede modificar estos campos:
-//   - DoctorID    → asigna un doctor al paciente
-//   - EnfermeroID → asigna un enfermero al paciente
+//   - DoctorID        → asigna un doctor al paciente
+//   - EnfermeroID     → asigna un enfermero al paciente
+//   - NombreEnfermero → nombre del enfermero (denormalizado para consultas rápidas)
 type AssignPacienteRequest struct {
-	DoctorID    *string `json:"doctor_id"`
-	EnfermeroID *string `json:"enfermero_id"`
+	DoctorID        *string `json:"doctor_id"`
+	EnfermeroID     *string `json:"enfermero_id"`
+	NombreEnfermero string  `json:"nombre_enfermero"`
 }
 
 // Execute asigna un paciente respetando las reglas de rol.
@@ -32,7 +34,7 @@ func (uc *AssignPacienteUseCase) Execute(pacienteID string, req AssignPacienteRe
 		if req.DoctorID == nil && req.EnfermeroID == nil {
 			return errors.New("debes proveer doctor_id o enfermero_id para asignar")
 		}
-		return uc.repo.Assign(pacienteID, req.DoctorID, req.EnfermeroID)
+		return uc.repo.Assign(pacienteID, req.DoctorID, req.EnfermeroID, req.NombreEnfermero)
 
 	default:
 		return errors.New("no tienes permisos para asignar pacientes")

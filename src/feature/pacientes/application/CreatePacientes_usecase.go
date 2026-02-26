@@ -17,27 +17,30 @@ func NewCreatePacienteUseCase(repo repositories.PacienteRepository) *CreatePacie
 
 // CreatePacienteRequest DTO de entrada para crear un paciente.
 type CreatePacienteRequest struct {
-	Nombre          string  `json:"nombre"           binding:"required"`
-	Edad            int     `json:"edad"             binding:"required,min=0,max=150"`
-	Estatura        float64 `json:"estatura"         binding:"required,min=1"`   // cm
-	Peso            float64 `json:"peso"             binding:"required,min=0.1"` // kg
-	RitmoCardiaco   int     `json:"ritmo_cardiaco"   binding:"required,min=0"`   // BPM
-	Saturacion      float64 `json:"saturacion"       binding:"required,min=0,max=100"`
-	PresionArterial string  `json:"presion_arterial" binding:"required"` // ej. "120/80"
-	SpO2            float64 `json:"spo2"             binding:"required,min=0,max=100"`
+	Nombre        string `json:"nombre"         binding:"required"`
+	Apellido      string `json:"apellido"       binding:"required"`
+	Edad          int    `json:"edad"           binding:"required,min=0,max=150"`
+	AreaNombre    string `json:"area_nombre"    binding:"required"`
+	EstadoActual  string `json:"estado_actual"  binding:"required"`
+	NotaCondicion string `json:"nota_condicion"`
+	TipoSangre    string `json:"tipo_sangre"    binding:"required"`
+	Sintomas      string `json:"sintomas"`
+	FechaRegistro string `json:"fecha_registro" binding:"required"`
 }
 
 func (uc *CreatePacienteUseCase) Execute(req CreatePacienteRequest) (*entities.Paciente, error) {
 	paciente := &entities.Paciente{
-		ID:              primitive.NewObjectID(),
-		Nombre:          req.Nombre,
-		Edad:            req.Edad,
-		Estatura:        req.Estatura,
-		Peso:            req.Peso,
-		RitmoCardiaco:   req.RitmoCardiaco,
-		Saturacion:      req.Saturacion,
-		PresionArterial: req.PresionArterial,
-		SpO2:            req.SpO2,
+		ID:                  primitive.NewObjectID(),
+		Nombre:              req.Nombre,
+		Apellido:            req.Apellido,
+		Edad:                req.Edad,
+		AreaNombre:          req.AreaNombre,
+		EstadoActual:        req.EstadoActual,
+		NotaCondicion:       req.NotaCondicion,
+		TipoSangre:          req.TipoSangre,
+		Sintomas:            req.Sintomas,
+		FechaRegistro:       req.FechaRegistro,
+		UltimaActualizacion: req.FechaRegistro,
 	}
 
 	if err := uc.repo.Save(paciente); err != nil {
