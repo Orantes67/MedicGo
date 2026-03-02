@@ -13,16 +13,18 @@ import (
 )
 
 // MongoDoctorRepository satisfies DoctorRepository using MongoDB.
-// It queries the "pacientes" collection and the "notas_clinicas" collection.
+// It queries the "pacientes", "notas_clinicas" and "users" collections.
 type MongoDoctorRepository struct {
 	pacientes *mongo.Collection
 	notas     *mongo.Collection
+	users     *mongo.Collection
 }
 
 func NewMongoDoctorRepository(db *mongo.Database) *MongoDoctorRepository {
 	return &MongoDoctorRepository{
 		pacientes: db.Collection("pacientes"),
 		notas:     db.Collection("notas_clinicas"),
+		users:     db.Collection("users"),
 	}
 }
 
@@ -44,16 +46,17 @@ func (r *MongoDoctorRepository) GetPacientesAsignados(doctorID string) ([]*entit
 	defer cursor.Close(ctx)
 
 	type rawPaciente struct {
-		ID                  primitive.ObjectID `bson:"_id"`
-		Nombre              string             `bson:"nombre"`
-		Apellido            string             `bson:"apellido"`
-		Edad                int                `bson:"edad"`
-		AreaNombre          string             `bson:"area_nombre"`
-		EstadoActual        string             `bson:"estado_actual"`
-		NotaCondicion       string             `bson:"nota_condicion"`
-		NombreEnfermero     string             `bson:"nombre_enfermero"`
-		UltimaActualizacion string             `bson:"ultima_actualizacion"`
-		FechaRegistro       string             `bson:"fecha_registro"`
+		ID                  primitive.ObjectID  `bson:"_id"`
+		Nombre              string              `bson:"nombre"`
+		Apellido            string              `bson:"apellido"`
+		Edad                int                 `bson:"edad"`
+		AreaNombre          string              `bson:"area_nombre"`
+		EstadoActual        string              `bson:"estado_actual"`
+		NotaCondicion       string              `bson:"nota_condicion"`
+		NombreEnfermero     string              `bson:"nombre_enfermero"`
+		UltimaActualizacion string              `bson:"ultima_actualizacion"`
+		FechaRegistro       string              `bson:"fecha_registro"`
+		EnfermeroID         *primitive.ObjectID `bson:"enfermero_id,omitempty"`
 	}
 
 	var results []*entities.PacienteResumenDoctor
@@ -62,6 +65,20 @@ func (r *MongoDoctorRepository) GetPacientesAsignados(doctorID string) ([]*entit
 		if err := cursor.Decode(&raw); err != nil {
 			return nil, err
 		}
+
+		// Resolve nurse name: prefer the denormalized field, fallback to users lookup.
+		nombreEnfermero := raw.NombreEnfermero
+		if nombreEnfermero == "" && raw.EnfermeroID != nil {
+			enfCtx, enfCancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer enfCancel()
+			var enfUser struct {
+				Name string `bson:"name"`
+			}
+			if err2 := r.users.FindOne(enfCtx, bson.M{"_id": raw.EnfermeroID}).Decode(&enfUser); err2 == nil {
+				nombreEnfermero = enfUser.Name
+			}
+		}
+
 		results = append(results, &entities.PacienteResumenDoctor{
 			ID:                  raw.ID.Hex(),
 			Nombre:              raw.Nombre,
@@ -70,7 +87,7 @@ func (r *MongoDoctorRepository) GetPacientesAsignados(doctorID string) ([]*entit
 			AreaNombre:          raw.AreaNombre,
 			EstadoActual:        raw.EstadoActual,
 			NotaCondicion:       raw.NotaCondicion,
-			NombreEnfermero:     raw.NombreEnfermero,
+			NombreEnfermero:     nombreEnfermero,
 			UltimaActualizacion: raw.UltimaActualizacion,
 			FechaRegistro:       raw.FechaRegistro,
 		})
@@ -97,14 +114,15 @@ func (r *MongoDoctorRepository) GetPacienteDetalle(pacienteID string, doctorID s
 	}
 
 	type rawPaciente struct {
-		ID                  primitive.ObjectID `bson:"_id"`
-		Nombre              string             `bson:"nombre"`
-		Apellido            string             `bson:"apellido"`
-		Edad                int                `bson:"edad"`
-		AreaNombre          string             `bson:"area_nombre"`
-		EstadoActual        string             `bson:"estado_actual"`
-		NombreEnfermero     string             `bson:"nombre_enfermero"`
-		UltimaActualizacion string             `bson:"ultima_actualizacion"`
+		ID                  primitive.ObjectID  `bson:"_id"`
+		Nombre              string              `bson:"nombre"`
+		Apellido            string              `bson:"apellido"`
+		Edad                int                 `bson:"edad"`
+		AreaNombre          string              `bson:"area_nombre"`
+		EstadoActual        string              `bson:"estado_actual"`
+		NombreEnfermero     string              `bson:"nombre_enfermero"`
+		UltimaActualizacion string              `bson:"ultima_actualizacion"`
+		EnfermeroID         *primitive.ObjectID `bson:"enfermero_id,omitempty"`
 	}
 
 	var raw rawPaciente
@@ -117,6 +135,19 @@ func (r *MongoDoctorRepository) GetPacienteDetalle(pacienteID string, doctorID s
 			return nil, errors.New("paciente no encontrado o no asignado a este doctor")
 		}
 		return nil, err
+	}
+
+	// Resolve nurse name: prefer the denormalized field, fallback to users lookup.
+	nombreEnfermero := raw.NombreEnfermero
+	if nombreEnfermero == "" && raw.EnfermeroID != nil {
+		enfCtx, enfCancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer enfCancel()
+		var enfUser struct {
+			Name string `bson:"name"`
+		}
+		if err2 := r.users.FindOne(enfCtx, bson.M{"_id": raw.EnfermeroID}).Decode(&enfUser); err2 == nil {
+			nombreEnfermero = enfUser.Name
+		}
 	}
 
 	// Fetch clinical notes written by this doctor for this patient.
@@ -132,7 +163,7 @@ func (r *MongoDoctorRepository) GetPacienteDetalle(pacienteID string, doctorID s
 		Edad:                raw.Edad,
 		AreaNombre:          raw.AreaNombre,
 		EstadoActual:        raw.EstadoActual,
-		NombreEnfermero:     raw.NombreEnfermero,
+		NombreEnfermero:     nombreEnfermero,
 		UltimaActualizacion: raw.UltimaActualizacion,
 		NotasClinicas:       notas,
 	}, nil

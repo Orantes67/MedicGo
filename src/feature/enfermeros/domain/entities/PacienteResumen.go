@@ -10,6 +10,7 @@ type PacienteResumen struct {
 	AreaNombre          string `json:"area_nombre"`
 	EstadoActual        string `json:"estado_actual"`
 	NotaCondicion       string `json:"nota_condicion"`
+	NombreDoctor        string `json:"nombre_doctor"`
 	UltimaActualizacion string `json:"ultima_actualizacion"`
 }
 
